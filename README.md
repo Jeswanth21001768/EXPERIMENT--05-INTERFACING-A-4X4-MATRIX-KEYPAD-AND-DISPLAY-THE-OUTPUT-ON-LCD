@@ -47,81 +47,43 @@ Whereas in 8 bit mode we can send the 8-bit data directly in one stroke since we
 
 There are some preset commands instructions in LCD, which we need to send to LCD through some microcontroller. Some important command instructions are given below:
 
-Hex Code
+Hex Code : Command to LCD Instruction Register
 
-Command to LCD Instruction Register
+0F : LCD ON, cursor ON
 
-0F
+01 : Clear display screen
 
-LCD ON, cursor ON
+02 : Return home
 
-01
+04 : Decrement cursor (shift cursor to left)
 
-Clear display screen
+06 : Increment cursor (shift cursor to right)
 
-02
+05 : Shift display right
 
-Return home
+07 : Shift display left
 
-04
+0E : Display ON, cursor blinking
 
-Decrement cursor (shift cursor to left)
+80 : Force cursor to beginning of first line
 
-06
+C0 : Force cursor to beginning of second line
 
-Increment cursor (shift cursor to right)
+38 : 2 lines and 5×7 matrix
 
-05
+83 : Cursor line 1 position 3
 
-Shift display right
+3C : Activate second line
 
-07
+08 : Display OFF, cursor OFF
 
-Shift display left
+C1 : Jump to second line, position 1
 
-0E
+OC : Display ON, cursor OFF
 
-Display ON, cursor blinking
+C1 : Jump to second line, position 1
 
-80
-
-Force cursor to beginning of first line
-
-C0
-
-Force cursor to beginning of second line
-
-38
-
-2 lines and 5×7 matrix
-
-83
-
-Cursor line 1 position 3
-
-3C
-
-Activate second line
-
-08
-
-Display OFF, cursor OFF
-
-C1
-
-Jump to second line, position 1
-
-OC
-
-Display ON, cursor OFF
-
-C1
-
-Jump to second line, position 1
-
-C2
-
-Jump to second line, position 2
+C2 : Jump to second line, position 2
  
 ## Procedure:
  1. click on STM 32 CUBE IDE, the following screen will appear 
@@ -171,32 +133,34 @@ We are now at the last part of step by step guide on how to simulate STM32 proje
 ![image](https://user-images.githubusercontent.com/36288975/233856847-32bea88a-565f-4e01-9c7e-4f7ed546ddf6.png)
 
 14. Double click on the the MCU part to open settings. Next to the Program File option, give full path to the Hex file generated using STM32Cube IDE. Then set the external crystal frequency to 8M (i.e. 8 MHz). Click OK to save the changes.
-https://engineeringxpert.com/wp-content/uploads/2022/04/26.png
+![image](https://engineeringxpert.com/wp-content/uploads/2022/04/26.png)
 
 15. click on debug and simulate using simulation as shown below 
 
 ![image](https://user-images.githubusercontent.com/36288975/233856904-99eb708a-c907-4595-9025-c9dbd89b8879.png)
 
-## CIRCUIT DIAGRAM 
- 
 
 ## STM 32 CUBE PROGRAM :
-```
+```c
 #include "main.h"
 #include "lcd.h"
 #include "stdbool.h"
 
 bool col1,col2,col3,col4;
+
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 
 void key();
 
+
+
 int main(void)
-HAL_Init();
+{
+  HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
- while (1)
+  while (1)
   {
     key();
     HAL_Delay(1000);
@@ -328,7 +292,7 @@ void key()
 
 	if(!col1){
 		Lcd_cursor(&lcd,0,1);
-		Lcd_string(&lcd,"key ON C\n");
+		Lcd_string(&lcd,"key ON/C\n");
 		HAL_Delay(500);
 		col1=1;
 	}
@@ -350,19 +314,7 @@ void key()
 		HAL_Delay(500);
 		col4=1;
 	}
-	else{
-		Lcd_cursor(&lcd,0,1);
-		Lcd_string(&lcd,"No Key Pressed");
-		HAL_Delay(500);
-	}
 }
-
-
-
-
-
-
-
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -402,89 +354,56 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
+
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
+
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PC0 PC1 PC2 PC3 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA0 PA1 PA2 PA3 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PC4 PC5 PC6 PC7 */
   GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB0 PB1 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
-}
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
   }
-  /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-}
-#endif /* USE_FULL_ASSERT */
+void assert_failed(uint8_t *file, uint32_t line){}
+#endif 
 ```
 
+## CIRCUIT DIAGRAM :
 
+![image](https://github.com/Pavan-Gv/EXPERIMENT--05-INTERFACING-A-4X4-MATRIX-KEYPAD-AND-DISPLAY-THE-OUTPUT-ON-LCD/assets/94827772/06b88397-124a-46d0-88b9-bd7136fec7b6)
 
-## Output screen shots of proteus  :
+## Output screen shots of proteus : 
 
- 
- 
- ## CIRCUIT DIAGRAM (EXPORT THE GRAPHICS TO PDF AND ADD THE SCREEN SHOT HERE): 
- <img width="783" alt="image" src="https://github.com/Jeswanth21001768/EXPERIMENT--05-INTERFACING-A-4X4-MATRIX-KEYPAD-AND-DISPLAY-THE-OUTPUT-ON-LCD/assets/94155480/52d5bfb4-fd94-4e4e-8b0d-f79af1b7b113">
+![image](https://github.com/Pavan-Gv/EXPERIMENT--05-INTERFACING-A-4X4-MATRIX-KEYPAD-AND-DISPLAY-THE-OUTPUT-ON-LCD/assets/94827772/40d3c4f9-a28d-4c37-bc47-12fddceaa8bd)
 
- 
 ## Result :
 Interfacing a 4x4 keypad with ARM microcontroller are simulated in proteus and the results are verified.
